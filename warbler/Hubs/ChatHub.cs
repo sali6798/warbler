@@ -25,7 +25,7 @@ namespace warbler.Hubs
         public async Task InvitePlayers(int gameId)
         {
             var game = _cache.Get<Game>(gameId);
-            if (game == null)
+            if (game != null)
             {
                 await Clients.All.SendAsync("GameAvailable", gameId);
             }
