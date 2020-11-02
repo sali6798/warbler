@@ -11,6 +11,8 @@ namespace warbler.Models
         public int Id { get; set; }
         public string Player1 { get; set; }
         public string Player2 { get; set; }
+        public bool HasStarted { get; set; }
+        public string currentPlayer { get; set; }
 
     }
 }

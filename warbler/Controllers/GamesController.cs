@@ -4,7 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Transactions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Caching.Memory;
+using warbler.Hubs;
 using warbler.Models;
 using warbler.Utils;
 
@@ -17,10 +19,12 @@ namespace warbler.Controllers
     public class GamesController : ControllerBase
     {
         private readonly IMemoryCache _cache;
+        private readonly IHubContext<ChatHub> _hubContext;
 
-        public GamesController(IMemoryCache memoryacche)
+        public GamesController(IMemoryCache memoryacche, IHubContext<ChatHub> hubContext)
         {
             _cache = memoryacche;
+            _hubContext = hubContext;
         }
 
         // GET: api/<GamesController>
@@ -71,6 +75,10 @@ namespace warbler.Controllers
             if (game != null && game.Player2 == null)
             {
                 game.Player2 = HttpContext.Connection.Id;
+                game.HasStarted = true;
+                game.currentPlayer = game.Player1;
+
+                _hubContext.Clients.Client(game.currentPlayer).SendAsync("TurnStarted", gameId);
             }
         }
 
