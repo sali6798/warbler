@@ -1,79 +1,78 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { HubConnectionBuilder } from "@microsoft/signalr";
+import API from "../utils/API";
 
-
-const Home = () => {
+export default function Home() {
     const [connection, setConnection] = useState(null);
+    // const [openGames, setOpenGames] = useState([]);
+    const [openGames, setOpenGames] = useState();
+    const [createdGameId, setCreatedGameId] = useState();
 
     useEffect(() => {
         const newConnection = new HubConnectionBuilder()
-            .withUrl("https://loaclhost:5001/hubs/chart")
+            .withUrl("/chatHub")
             .withAutomaticReconnect()
             .build();
 
         setConnection(newConnection);
     }, []);
-}
 
-export default Home;
+    useEffect(() => {
+        if (connection) {
+            connection.start()
+                .then(result => {
+                    console.log("Connected!");
 
-/*export class Home extends Component {
-    static displayName = Home.name;
+                    connection.on("GameAvailable", id => {
+                        // console.log(openGames)
+                        // console.log(id);
+                        setOpenGames(id);
+                        // setOpenGames([...openGames, id]);
+                    })
+                })
+                .catch(e => console.log("Connection failed:", e))
 
+        }
+    }, [connection]);
 
+    const handleClick = async event => {
+        try {
+            const { id } = event.target;
 
-    *//*handleClick(event) {
-  
-        //event.target.style.color = 
-    }*/
+            if (id === "createButton") {
+                const gameId = await API.startGame();
+                // console.log(gameId)
+                setCreatedGameId(gameId);
+                // console.log(openGames)
+                // setOpenGames([...openGames, gameId]);
 
-  /*  componentDidMount() {
-        var connection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
+                connection.invoke("InvitePlayers", gameId);
+            }
+            else {
+                await API.joinGame(openGames);
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
 
-        connection.start().then(function () {
-            document.getElementById("sendButton").disabled = false;
-        }).catch(function (err) {
-            return console.error(err.toString());
-        });
-
-    }*//*
-
-  render () {
-      return (
+    return (
         <>
-            <div className="container">
-                <div className="row">&nbsp;</div>
-                <div className="row">
-                    <div className="col-2">User</div>
-                    <div className="col-4"><input type="text" id="userInput" /></div>
-                </div>
-                <div className="row">
-                    <div className="col-2">Message</div>
-                    <div className="col-4"><input type="text" id="messageInput" /></div>
-                </div>
-                <div className="row">&nbsp;</div>
-                <div className="row">
-                      <div className="col-6">
-                          <input type="button" id="sendButton" value="Send Message" onClick={this.handleClick} />
-                    </div>
-                </div>
-            </div>
-            <div className="row">
-                <div className="col-12">
-                    <hr />
-                </div>
-            </div>
             <div className="row">
                 <div className="col-6">
-                    <ul id="messagesList"></ul>
+                    <input type="button" id="createButton" value="Create Game" onClick={handleClick} />
                 </div>
-             </div>
-            <div className="row">
-                  <div className="col-2">
-                      <input type="button" id="joinButton" value="Join Game" />
-                  </div>
+                <div className="col-6">
+                    {
+                        createdGameId !== openGames
+                        ? <input type="button" id="joinButton" value="Join Game" onClick={handleClick}/>
+                        : null
+                    /* {
+                        openGames.map(openGame => <input type="button" key={openGame} value="Join Game" />)
+                    } */
+                    }
+                </div>
             </div>
         </>
     );
-  }
-}*/
+}
