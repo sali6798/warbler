@@ -46,16 +46,32 @@ namespace warbler.Controllers
             var gameId = IdGenerator.GetNextId();
             var game = new Game() { Id = gameId, Player1 = HttpContext.Connection.Id };
 
-            var entry = _cache.CreateEntry(gameId);
-            entry.Value = game;
+            //var entry = _cache.CreateEntry(gameId);
+            //entry.Value = game;
+
+            _cache.Set<Game>(gameId, game);
 
             return gameId;
         }
 
+        /*
         // PUT api/<GamesController>/5
         [HttpPut("{id}")]
         public void Put(int id, [FromBody] string value)
         {
+        }
+        */
+
+        // PUT api/<GamesController>/5
+        [HttpPut("{id}")]
+        public void JoinGame(int gameId)
+        {
+            var game = _cache.Get<Game>(gameId);
+
+            if (game != null && game.Player2 == null)
+            {
+                game.Player2 = HttpContext.Connection.Id;
+            }
         }
 
         // DELETE api/<GamesController>/5

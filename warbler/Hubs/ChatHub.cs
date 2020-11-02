@@ -22,26 +22,16 @@ namespace warbler.Hubs
             await Clients.All.SendAsync("ReceivedMessage", user, message);
         }
 
-        public async Task CreateGame()
-        {
-            var gameId = IdGenerator.GetNextId();
-            var game = new Game() { Id = IdGenerator.GetNextId(), Player1 = Context.ConnectionId };
-            var entry = _cache.CreateEntry(gameId);
-            entry.Value = game;
-            await Clients.All.SendAsync("GameCreated", gameId);
-        }
-
-        public async Task JoinGame(int gameId)
+        public async Task InvitePlayers(int gameId)
         {
             var game = _cache.Get<Game>(gameId);
-            if (game != null)
+            if (game == null)
             {
-                game.Player2 = Context.ConnectionId;
-                await Clients.All.SendAsync("GameStarted", gameId);
+                await Clients.All.SendAsync("GameAvailable", gameId);
             }
             else
             {
-                await Clients.All.SendAsync("Error", "Game not found");
+                throw new ArgumentException("Invalid GameId");
             }
         }
 
