@@ -1,5 +1,5 @@
 import jquery from "jquery";
-const BASE_URL = "https://localhost:5001/api/";
+const BASE_URL = `https://${window.location.host}/api/`;
 
 export default {
     startGame: function() {
