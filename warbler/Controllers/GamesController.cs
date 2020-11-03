@@ -57,7 +57,7 @@ namespace warbler.Controllers
 
             //_cache.Set<Game>(gameId, game);
 
-            return CreatedAtAction(nameof(Get), new { gameId = game.Id, userId = 0});
+            return CreatedAtAction(nameof(Get), new { gameId = game.Id, playerId = 0});
         }
 
         /*
@@ -81,7 +81,7 @@ namespace warbler.Controllers
 
                 //await _hubContext.Clients.All.SendAsync("TurnStarted", new { gameId = game.Id, currPlayer = game.currentPlayer });
 
-                return CreatedAtAction(nameof(Get), new { gameId = game.Id, userId = 1 });
+                return CreatedAtAction(nameof(Get), new { gameId = game.Id, playderId = 1 });
             }
 
             return NotFound();
