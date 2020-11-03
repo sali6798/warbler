@@ -53,14 +53,14 @@ namespace warbler.Hubs
             }
         }
 
-        public async Task<IActionResult> PlayerAction(int gameId, int playerId, List<int> action)
+        public async Task<IActionResult> PlayerAction(int gameId, int playerId, List<int> actions)
         {
             var game = _cache.Get<Game>(gameId);
             if (game != null && game.HasStarted)
             {
-                var currentPlayer = game.CurrentPlayer;
-                game.CurrentPlayer = (++currentPlayer) % 2;
-                await Clients.All.SendAsync("PlayerAction", game.Id, game.CurrentPlayer, action);
+                var lastPlayer = game.CurrentPlayer;
+                game.CurrentPlayer = (lastPlayer + 1) % 2;
+                await Clients.All.SendAsync("PlayerAction", game.Id, new { lastPlayer = lastPlayer, currentPlayer = game.CurrentPlayer, actions = actions });
                 return new OkResult();
             }
             else
