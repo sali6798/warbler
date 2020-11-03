@@ -44,7 +44,7 @@ namespace warbler.Hubs
             {
                 game.CurrentPlayer = 1;
                 game.HasStarted = true;
-                await Clients.All.SendAsync("PlayerTurn", game.Id, game.CurrentPlayer);
+                await Clients.All.SendAsync("GameReady", game.Id, game.CurrentPlayer);
                 return new OkResult();
             }
             else
@@ -60,7 +60,7 @@ namespace warbler.Hubs
             {
                 var currentPlayer = game.CurrentPlayer;
                 game.CurrentPlayer = (++currentPlayer) % 2;
-                await Clients.All.SendAsync("PlayerTurn", game.Id, game.CurrentPlayer, action);
+                await Clients.All.SendAsync("PlayerAction", game.Id, game.CurrentPlayer, action);
                 return new OkResult();
             }
             else
