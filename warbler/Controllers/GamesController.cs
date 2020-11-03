@@ -89,8 +89,22 @@ namespace warbler.Controllers
 
         // DELETE api/<GamesController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public async Task<IActionResult> Delete(int gameId)
         {
+            var game = await Task.Run<Game>(() => { return _cache.Get<Game>(gameId); });
+
+            if (game != null)
+            {
+                _cache.Remove(gameId);
+
+                await _hubContext.Clients.All.SendAsync("GameEnded", new { gameId = game.Id});
+
+                return Ok();
+            }
+            else
+            {
+                return NotFound();
+            }
         }
     }
 }
