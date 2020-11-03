@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Caching.Memory;
 using warbler.Models;
@@ -35,5 +37,36 @@ namespace warbler.Hubs
             }
         }
 
+        public async Task<IActionResult> PlayerJoined(int gameId, int playerId)
+        {
+            var game = _cache.Get<Game>(gameId);
+            if (game != null && !game.HasStarted)
+            {
+                game.currentPlayer = 1;
+                game.HasStarted = true;
+                await Clients.All.SendAsync("PlayerTurn", game.Id, game.currentPlayer);
+                return new OkResult();
+            }
+            else
+            {
+                return new NotFoundResult();
+            }
+        }
+
+        public async Task<IActionResult> PlayerAction(int gameId, int playerId, List<int> action)
+        {
+            var game = _cache.Get<Game>(gameId);
+            if (game != null && game.HasStarted)
+            {
+                var currentPlayer = game.currentPlayer;
+                game.currentPlayer = (++currentPlayer) % 2;
+                await Clients.All.SendAsync("PlayerTurn", game.Id, game.currentPlayer);
+                return new OkResult();
+            }
+            else
+            {
+                return new NotFoundResult();
+            }
+        }
     }
 }

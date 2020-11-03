@@ -44,18 +44,20 @@ namespace warbler.Controllers
         // POST api/<GamesController>
         [HttpPost]
         //public void Post([FromBody] string value)
-        public int Post()
+        public async Task<IActionResult> Post()
         {
             
             var gameId = IdGenerator.GetNextId();
-            var game = new Game() { Id = gameId, Player1 = HttpContext.Connection.Id };
+            //var game = new Game() { Id = gameId };
 
             //var entry = _cache.CreateEntry(gameId);
             //entry.Value = game;
 
-            _cache.Set<Game>(gameId, game);
+            var game = await _cache.GetOrCreateAsync<Game>(gameId, entry => { return Task.FromResult(new Game() { Id = gameId });});
 
-            return gameId;
+            //_cache.Set<Game>(gameId, game);
+
+            return CreatedAtAction(nameof(Get), new { gameId = game.Id, userId = 0});
         }
 
         /*
@@ -67,19 +69,22 @@ namespace warbler.Controllers
         */
 
         // PUT api/<GamesController>/5
-        [HttpPut("{id}")]
-        public void JoinGame(int gameId)
+        [HttpPut("{gameid}")]
+        public IActionResult JoinGame(int gameId)
         {
             var game = _cache.Get<Game>(gameId);
 
-            if (game != null && game.Player2 == null)
+            if (game != null && !game.HasStarted)
             {
-                game.Player2 = HttpContext.Connection.Id;
-                game.HasStarted = true;
-                game.currentPlayer = game.Player1;
+                //game.HasStarted = true;
+                //game.currentPlayer = 1;
 
-                _hubContext.Clients.Client(game.currentPlayer).SendAsync("TurnStarted", gameId);
+                //await _hubContext.Clients.All.SendAsync("TurnStarted", new { gameId = game.Id, currPlayer = game.currentPlayer });
+
+                return CreatedAtAction(nameof(Get), new { gameId = game.Id, userId = 1 });
             }
+
+            return NotFound();
         }
 
         // DELETE api/<GamesController>/5
