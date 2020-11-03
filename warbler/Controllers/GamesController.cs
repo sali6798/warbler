@@ -69,7 +69,7 @@ namespace warbler.Controllers
         */
 
         // PUT api/<GamesController>/5
-        [HttpPut("{gameid}")]
+        [HttpPut("{id}")]
         public IActionResult JoinGame(int gameId)
         {
             var game = _cache.Get<Game>(gameId);
