@@ -99,7 +99,7 @@ namespace warbler.Controllers
 
                 await _hubContext.Clients.All.SendAsync("GameEnded", new { gameId = game.Id});
 
-                return Ok();
+                return NoContent();
             }
             else
             {

@@ -61,7 +61,7 @@ namespace warbler.Hubs
                 var lastPlayer = game.CurrentPlayer;
                 game.CurrentPlayer = (lastPlayer + 1) % 2;
                 await Clients.All.SendAsync("PlayerAction", game.Id, new { lastPlayer = lastPlayer, currentPlayer = game.CurrentPlayer, actions = actions });
-                return new OkResult();
+                return new NoContentResult();
             }
             else
             {
