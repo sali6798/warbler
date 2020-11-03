@@ -42,9 +42,9 @@ namespace warbler.Hubs
             var game = _cache.Get<Game>(gameId);
             if (game != null && !game.HasStarted)
             {
-                game.currentPlayer = 1;
+                game.CurrentPlayer = 1;
                 game.HasStarted = true;
-                await Clients.All.SendAsync("PlayerTurn", game.Id, game.currentPlayer);
+                await Clients.All.SendAsync("PlayerTurn", game.Id, game.CurrentPlayer);
                 return new OkResult();
             }
             else
@@ -58,9 +58,9 @@ namespace warbler.Hubs
             var game = _cache.Get<Game>(gameId);
             if (game != null && game.HasStarted)
             {
-                var currentPlayer = game.currentPlayer;
-                game.currentPlayer = (++currentPlayer) % 2;
-                await Clients.All.SendAsync("PlayerTurn", game.Id, game.currentPlayer);
+                var currentPlayer = game.CurrentPlayer;
+                game.CurrentPlayer = (++currentPlayer) % 2;
+                await Clients.All.SendAsync("PlayerTurn", game.Id, game.CurrentPlayer, action);
                 return new OkResult();
             }
             else
