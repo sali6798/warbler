@@ -1,0 +1,21 @@
+.Cell {
+    border: 2px solid black;
+    width: 100%;
+    padding-top: 100%;
+    position: relative;
+    cursor: pointer;
+}
+
+.Cell svg {
+    top: 0; 
+    position: absolute;
+}
+
+.Cell line, .Cell circle {
+    stroke: black; 
+    stroke-width: 2;
+}
+
+.Cell circle {
+    fill: none;
+}

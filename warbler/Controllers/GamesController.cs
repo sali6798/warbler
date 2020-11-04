@@ -81,7 +81,7 @@ namespace warbler.Controllers
 
                 //await _hubContext.Clients.All.SendAsync("TurnStarted", new { gameId = game.Id, currPlayer = game.currentPlayer });
 
-                return CreatedAtAction(nameof(Get), new { gameId = game.Id, playderId = 1 });
+                return CreatedAtAction(nameof(Get), new { gameId = game.Id, playerId = 1 });
             }
 
             return NotFound();
