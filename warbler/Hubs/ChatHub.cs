@@ -68,5 +68,21 @@ namespace warbler.Hubs
                 return new NotFoundResult();
             }
         }
+
+        public async Task<IActionResult> GameWon(int gameId, int winnerId)
+        {
+            var game = _cache.Get<Game>(gameId);
+            if (game != null && game.HasStarted)
+            {
+                game.HasStarted = false;
+                game.CurrentPlayer = winnerId;
+                await Clients.All.SendAsync("GameWon", game.Id, winnerId);
+                return new NoContentResult();
+            }
+            else
+            {
+                return new NotFoundResult();
+            }
+        }
     }
 }
