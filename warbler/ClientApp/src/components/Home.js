@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { HubConnectionBuilder } from "@microsoft/signalr";
+import { useDispatch, useSelector } from "react-redux";
 import Grid from "./Grid";
 import API from "../utils/API";
+import { storeIds } from "../store/actions/game";
 
-export default function Home() {
+const Home = () => {
     const [connection, setConnection] = useState(null);
-    const [openGames, setOpenGames] = useState();
-    const [playerId, setPlayerId] = useState();
-    const [currentPlayerId, setCurrentPlayerId] = useState();
-    const [currentGameId, setCurrentGameId] = useState();
-
     const [hasCreatedGame, setHasCreatedGame] = useState(false);
+    const [openGames, setOpenGames] = useState();
+
+    const dispatch = useDispatch();
+    const currentGameId = useSelector(state => state.currentGameId);
+    const playerId = useSelector(state => state.playerId);
 
     useEffect(() => {
         const newConnection = new HubConnectionBuilder()
@@ -32,7 +34,8 @@ export default function Home() {
                     });
 
                     connection.on("GameReady", (id, player) => {
-                        setCurrentPlayerId(player);
+                        // setCurrentPlayerId(player);
+                        console.log(id, player)
                     });
                 })
                 .catch(e => console.log("Connection failed:", e))
@@ -40,25 +43,28 @@ export default function Home() {
         }
     }, [connection]);
 
+    useEffect(() => {
+        if (currentGameId) {
+            if (hasCreatedGame) {
+                connection.invoke("InvitePlayers", currentGameId);
+            }
+            else {
+                connection.invoke("PlayerJoined", currentGameId, playerId);
+            }
+        }
+    }, [currentGameId, playerId])
+
+
     const handleClick = async event => {
         try {
             const { id } = event.target;
 
             if (id === "createButton") {
                 setHasCreatedGame(true);
-
-                const { gameId, playerId } = await API.startGame();
-                setCurrentGameId(gameId);
-                setPlayerId(playerId);
-
-                connection.invoke("InvitePlayers", gameId);
+                dispatch(storeIds("create"));
             }
             else {
-                const { gameId, playerId } = await API.joinGame(openGames);
-                setCurrentGameId(gameId);
-                setPlayerId(playerId);
-
-                connection.invoke("PlayerJoined", gameId, playerId);
+                dispatch(storeIds("join", openGames));
             }
         } catch (error) {
             console.log(error);
@@ -74,11 +80,11 @@ export default function Home() {
                 <div className="col-6">
                     {
                         !hasCreatedGame && openGames
-                        ? <input type="button" id="joinButton" value="Join Game" onClick={handleClick}/>
-                        : null
-                    /* {
-                        openGames.map(openGame => <input type="button" key={openGame} value="Join Game" />)
-                    } */
+                            ? <input type="button" id="joinButton" value="Join Game" onClick={handleClick} />
+                            : null
+                        /* {
+                            openGames.map(openGame => <input type="button" key={openGame} value="Join Game" />)
+                        } */
                     }
                 </div>
             </div>
@@ -86,3 +92,110 @@ export default function Home() {
         </>
     );
 }
+
+export default Home;
+
+// const mapStateToProps = state => {
+//     return {
+//         connection: state.connection
+//     };
+// };
+
+// const mapDispatchToProps = dispatch => {
+//     return {
+//         onConnection: () => dispatch({ type: actionTypes.START_GAME })
+//     };
+// };
+
+// export default connect(mapStateToProps, mapDispatchToProps)(Home);
+
+// const Home = () => {
+//     const [connection, setConnection] = useState(null);
+//     const [openGames, setOpenGames] = useState();
+//     const [playerId, setPlayerId] = useState();
+//     const [currentPlayerId, setCurrentPlayerId] = useState();
+//     const [currentGameId, setCurrentGameId] = useState();
+
+//     const [hasCreatedGame, setHasCreatedGame] = useState(false);
+//     const [gameBoard, setGameBoard] = useState(
+//         [
+//             [-1, -1, -1],
+//             [-1, -1, -1],
+//             [-1, -1, -1]
+//         ]
+//     );
+
+//     useEffect(() => {
+//         const newConnection = new HubConnectionBuilder()
+//             .withUrl("/chatHub")
+//             .withAutomaticReconnect()
+//             .build();
+
+//         setConnection(newConnection);
+//     }, []);
+
+//     useEffect(() => {
+//         if (connection) {
+//             connection.start()
+//                 .then(result => {
+//                     console.log("Connected!");
+
+//                     connection.on("GameAvailable", id => {
+//                         setOpenGames(id);
+//                     });
+
+//                     connection.on("GameReady", (id, player) => {
+//                         setCurrentPlayerId(player);
+//                     });
+//                 })
+//                 .catch(e => console.log("Connection failed:", e))
+
+//         }
+//     }, [connection]);
+
+//     const handleClick = async event => {
+//         try {
+//             const { id } = event.target;
+
+//             if (id === "createButton") {
+//                 setHasCreatedGame(true);
+
+//                 const { gameId, playerId } = await API.startGame();
+//                 setCurrentGameId(gameId);
+//                 setPlayerId(playerId);
+
+//                 connection.invoke("InvitePlayers", gameId);
+//             }
+//             else {
+//                 const { gameId, playerId } = await API.joinGame(openGames);
+//                 setCurrentGameId(gameId);
+//                 setPlayerId(playerId);
+
+//                 connection.invoke("PlayerJoined", gameId, playerId);
+//             }
+//         } catch (error) {
+//             console.log(error);
+//         }
+//     }
+
+//     return (
+//         <>
+//             <div className="row">
+//                 <div className="col-6">
+//                     {connection ? <input type="button" id="createButton" value="Create Game" onClick={handleClick} /> : null}
+//                 </div>
+//                 <div className="col-6">
+//                     {
+//                         !hasCreatedGame && openGames
+//                         ? <input type="button" id="joinButton" value="Join Game" onClick={handleClick}/>
+//                         : null
+//                     /* {
+//                         openGames.map(openGame => <input type="button" key={openGame} value="Join Game" />)
+//                     } */
+//                     }
+//                 </div>
+//             </div>
+//             {currentGameId ? <Grid playerId={playerId} currentPlayerId={currentPlayerId}  /> : null}
+//         </>
+//     );
+// }
