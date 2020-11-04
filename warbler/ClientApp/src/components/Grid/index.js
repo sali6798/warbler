@@ -1,9 +1,11 @@
 import React from "react";
-import Row from "./Row";
+import Row from "../Row";
+
+import "./style.css";
 
 export default function Grid() {
     return (
-        <div style={{width: "70%", margin: "0 auto", padding: "20px 0"}}>
+        <div className="Grid">
             <Row />
             <Row />
             <Row />
