@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { HubConnectionBuilder } from "@microsoft/signalr";
 import { useDispatch, useSelector } from "react-redux";
 import Grid from "./Grid";
-import API from "../utils/API";
-import { storeIds } from "../store/actions/game";
+import { storeIds, updateCurrentPlayer, updateGameBoard } from "../store/actions/game";
 
 const Home = () => {
     const [connection, setConnection] = useState(null);
@@ -12,6 +11,7 @@ const Home = () => {
 
     const dispatch = useDispatch();
     const currentGameId = useSelector(state => state.currentGameId);
+    const currentPlayerId = useSelector(state => state.currentPlayerId);
     const playerId = useSelector(state => state.playerId);
 
     useEffect(() => {
@@ -22,6 +22,7 @@ const Home = () => {
 
         setConnection(newConnection);
     }, []);
+
 
     useEffect(() => {
         if (connection) {
@@ -34,14 +35,19 @@ const Home = () => {
                     });
 
                     connection.on("GameReady", (id, player) => {
-                        // setCurrentPlayerId(player);
-                        console.log(id, player)
+                        dispatch(updateCurrentPlayer(player));
                     });
+
+                    connection.on("PlayerAction", (...args) => {
+                        dispatch(updateCurrentPlayer(args[1].currentPlayer));
+                        dispatch(updateGameBoard(args[1].actions));
+                    })
                 })
                 .catch(e => console.log("Connection failed:", e))
-
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [connection]);
+
 
     useEffect(() => {
         if (currentGameId) {
@@ -52,22 +58,19 @@ const Home = () => {
                 connection.invoke("PlayerJoined", currentGameId, playerId);
             }
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentGameId, playerId])
 
 
-    const handleClick = async event => {
-        try {
-            const { id } = event.target;
+    const handleClick = event => {
+        const { id } = event.target;
 
-            if (id === "createButton") {
-                setHasCreatedGame(true);
-                dispatch(storeIds("create"));
-            }
-            else {
-                dispatch(storeIds("join", openGames));
-            }
-        } catch (error) {
-            console.log(error);
+        if (id === "createButton") {
+            setHasCreatedGame(true);
+            dispatch(storeIds("create"));
+        }
+        else {
+            dispatch(storeIds("join", openGames));
         }
     }
 
@@ -88,7 +91,8 @@ const Home = () => {
                     }
                 </div>
             </div>
-            {currentGameId ? <Grid /> : null}
+            
+            {currentPlayerId !== null && currentGameId ? <Grid connection={connection}/> : null}
         </>
     );
 }
