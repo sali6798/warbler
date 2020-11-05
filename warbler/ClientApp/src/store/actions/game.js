@@ -6,13 +6,13 @@ export const saveIds = (gameId, playerId) => {
         type: actionTypes.STORE_IDS,
         payload: { gameId: gameId, playerId: playerId }
     }
-}
+};
 
 export const storeIds = (...args) => {
     return async dispatch => {
         try {
             let response;
-            
+
             if (args[0] === "create") {
                 response = await API.startGame();
             }
@@ -26,3 +26,29 @@ export const storeIds = (...args) => {
         }
     }
 };
+
+export const updateCurrentPlayer = id => {
+    return {
+        type: actionTypes.UPDATE_CURRENT_PLAYER,
+        currentPlayer: id
+    }
+};
+
+export const updateGameBoard = (...args) => {
+    if (args.length === 2) {
+        return {
+            type: actionTypes.UPDATE_GAME_BOARD,
+            payload: {
+                currentPlayer: args[0],
+                index: args[1]
+            }
+        }
+    }
+    
+    return {
+        type: actionTypes.UPDATE_GAME_BOARD,
+        payload: {
+            newBoard: args[0]
+        }
+    }
+}
