@@ -69,14 +69,14 @@ namespace warbler.Hubs
             }
         }
 
-        public async Task<IActionResult> GameWon(int gameId, int winnerId)
+        public async Task<IActionResult> GameWon(int gameId, int winnerId, List<int> actions)
         {
             var game = _cache.Get<Game>(gameId);
             if (game != null && game.HasStarted)
             {
                 game.HasStarted = false;
                 game.CurrentPlayer = winnerId;
-                await Clients.All.SendAsync("GameWon", game.Id, winnerId);
+                await Clients.All.SendAsync("GameWon", game.Id, winnerId, actions);
                 return new NoContentResult();
             }
             else
