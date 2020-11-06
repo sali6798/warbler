@@ -51,4 +51,13 @@ export const updateGameBoard = (...args) => {
             newBoard: args[0]
         }
     }
+};
+
+export const endGame = gameBoard => {
+    return {
+        type: actionTypes.END_GAME,
+        payload: {
+            newBoard: gameBoard
+        }
+    }
 }

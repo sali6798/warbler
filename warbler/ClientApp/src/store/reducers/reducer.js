@@ -1,36 +1,42 @@
 import * as actionTypes from "../actions/actionTypes";
 
 const initialState = {
+    currentGameId: null,
+    currentPlayerId: null,
     gameBoard: [
         [-1, -1, -1],
         [-1, -1, -1],
         [-1, -1, -1]
     ],
-    currentGameId: null,
-    currentPlayerId: null,
+    hasGameFinished: false,
     playerId: null
 };
 
+
 const updateGameBoard = (state, payload) => {
+    let newArr;
+
     if (payload.newBoard) {
-        return [
+        newArr = [
             payload.newBoard.slice(0, 3),
             payload.newBoard.slice(3, 6),
             payload.newBoard.slice(6)
         ]
     }
-
-    const newArr = state.gameBoard.map((row, index) => {
-        if (index === +payload.index[0]) {
-            const copy = [...row];
-            copy[+payload.index[1]] = payload.currentPlayer
-            return copy;
-        }
-        return row;
-    });
+    else {
+        newArr = state.gameBoard.map((row, index) => {
+            if (index === +payload.index[0]) {
+                const copy = [...row];
+                copy[+payload.index[1]] = payload.currentPlayer
+                return copy;
+            }
+            return row;
+        });
+    }
 
     return newArr;
 }
+
 
 const reducer = (state = initialState, action) => {
     switch (action.type) {
@@ -49,6 +55,12 @@ const reducer = (state = initialState, action) => {
             return {
                 ...state,
                 gameBoard: updateGameBoard(state, action.payload)
+            }
+        case actionTypes.END_GAME:
+            return {
+                ...state,
+                gameBoard: updateGameBoard(state, action.payload),
+                hasGameFinished: true
             }
         default:
             return state;

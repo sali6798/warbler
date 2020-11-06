@@ -1,3 +1,4 @@
 export const STORE_IDS = "STORE_IDS";
 export const UPDATE_CURRENT_PLAYER = "UPDATE_CURRENT_PLAYER";
 export const UPDATE_GAME_BOARD = "UPDATE_GAME_BOARD";
+export const END_GAME = "END_GAME";
