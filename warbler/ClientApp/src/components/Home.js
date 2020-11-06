@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { HubConnectionBuilder } from "@microsoft/signalr";
 import { useDispatch, useSelector } from "react-redux";
 import Grid from "./Grid";
-import { storeIds, updateCurrentPlayer, updateGameBoard } from "../store/actions/game";
+import { endGame, storeIds, updateCurrentPlayer, updateGameBoard } from "../store/actions/game";
 
 const Home = () => {
     const [connection, setConnection] = useState(null);
@@ -41,7 +41,11 @@ const Home = () => {
                     connection.on("PlayerAction", (...args) => {
                         dispatch(updateCurrentPlayer(args[1].currentPlayer));
                         dispatch(updateGameBoard(args[1].actions));
-                    })
+                    });
+
+                    connection.on("GameWon", (...args) => {
+                        dispatch(endGame(args[2]));
+                    });
                 })
                 .catch(e => console.log("Connection failed:", e))
         }
