@@ -10,18 +10,52 @@ export default function Grid(props) {
     const currentGameId = useSelector(state => state.currentGameId)
     const currentPlayerId = useSelector(state => state.currentPlayerId);
     const gameBoard = useSelector(state => state.gameBoard);
+    const hasGameFinished = useSelector(state => state.hasGameFinished);
     const playerId = useSelector(state => state.playerId);
     const [isChangedGame, setIsChangedGame] = useState(false);
-
+    
     useEffect(() => {
         if (isChangedGame) {
-            props.connection.invoke("PlayerAction", currentGameId, currentPlayerId, gameBoard.flat())
-            setIsChangedGame(false);
+            const hasWon = checkForWinner(gameBoard.flat());
+
+            if (!hasWon) {
+                props.connection.invoke("PlayerAction", currentGameId, currentPlayerId, gameBoard.flat())
+                setIsChangedGame(false);
+            }
+            else {
+                props.connection.invoke("GameWon", currentGameId, currentPlayerId, gameBoard.flat());
+            }
         }
-    }, [gameBoard, isChangedGame])
+        
+    }, [gameBoard, isChangedGame, hasGameFinished])
+
+    const checkForWinner = updatedGameBoard => {
+        const winningCombinations = [
+            [0, 1, 2],
+            [3, 4, 5],
+            [6, 7, 8],
+            [0, 3, 6],
+            [1, 4, 7],
+            [2, 5, 8],
+            [0, 4, 8],
+            [2, 4, 6],
+        ];
+    
+        for (let i = 0; i < winningCombinations.length; i++) {
+            const [a, b, c] = winningCombinations[i];
+    
+            if (updatedGameBoard[a] > -1 
+                && updatedGameBoard[a] === updatedGameBoard[b] 
+                && updatedGameBoard[a] === updatedGameBoard[c]) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
 
     const handleClick = (value, index) => {
-        if (playerId === currentPlayerId && value === -1) {
+        if (!hasGameFinished && playerId === currentPlayerId && value === -1) {
             dispatch(updateGameBoard(currentPlayerId, index));
             setIsChangedGame(true);
         }
@@ -29,10 +63,13 @@ export default function Grid(props) {
 
     return (
         <div className="Grid">
-            {playerId === currentPlayerId
+            {hasGameFinished 
+                ? <h1>Player {currentPlayerId} is the winner!</h1>
+                : (playerId === currentPlayerId
                 ? <h1>It is your move!</h1>
-                : <h1>Waiting for the other player's move...</h1>
+                : <h1>Waiting for the other player's move...</h1>)
             }
+        
 
             {gameBoard.map((row, rowIndex) => (
                 <div key={rowIndex} className="row no-gutters">
